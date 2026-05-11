@@ -1,0 +1,92 @@
+# ============================================
+# .NET / C#
+# ============================================
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Pp]ublish/
+publish/
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Visual Studio
+.vs/
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+
+# Rider / VS Code
+.idea/
+.vscode/
+*.swp
+
+# ============================================
+# Secrets / Certs / Local Config
+# ============================================
+*.pfx
+*.key
+*.pem
+certs/
+appsettings.Local.json
+appsettings.Production.json
+.env
+.env.*
+!.env.example
+
+# ============================================
+# Game Runtime Data
+# ============================================
+data/
+*.log
+scoreboard.json
+
+# ============================================
+# Generated content (regenerate via scripts)
+# ============================================
+src/CurlMaster.Api/wwwroot/mission.zip
+src/CurlMaster.Api/wwwroot/mission.rar
+src/CurlMaster.Api/wwwroot/list.txt
+src/CurlMaster.Api/wwwroot/ipucu.txt
+
+# ============================================
+# Claude Code internal
+# ============================================
+.claude/
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
