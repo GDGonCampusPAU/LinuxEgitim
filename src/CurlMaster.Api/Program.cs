@@ -37,7 +37,10 @@ builder.Services.AddCors(options =>
         else
             policy.WithOrigins(allowedOrigins);
 
-        policy.AllowAnyMethod().AllowAnyHeader();
+        policy
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithExposedHeaders("X-Next-Step");
     });
 });
 
