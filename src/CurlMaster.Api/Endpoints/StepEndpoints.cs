@@ -71,28 +71,6 @@ public static class StepEndpoints
             return Results.File(path, "application/zip", "kalinti.zip");
         });
 
-        app.MapGet("/mabed", (HttpRequest request) =>
-        {
-            if (!request.IsHttps)
-            {
-                return Results.BadRequest(
-                    """
-                    Mabed güvensiz yolcuları kabul etmiyor.
-
-                    Güvenli bir bağlantı kurmayı dene.
-                    """
-                );
-            }
-
-            return Results.Text(
-                """
-                Mabed seni kabul etti.
-
-                Son adımda sunağa adını ve bulduğun kodu sunmalısın.
-                """
-            );
-        });
-
         app.MapPost("/sunak", async (
             [FromForm] FinishRequest payload,
             IConfiguration config,
