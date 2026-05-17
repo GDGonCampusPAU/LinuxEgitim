@@ -11,7 +11,7 @@ services:
       - "${HTTPS_PORT:-443}:8443"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      Game__AccessCode: ${ACCESS_CODE:-linux_kernel_2026}
+      Game__AccessCode: ${ACCESS_CODE:-linuxegitim101}
       Game__ArchivePassword: ${ARCHIVE_PASSWORD:-gdgvesiberay}
       Game__HttpsCertPassword: ${CERT_PASSWORD:-curlmaster}
       Admin__ApiKey: ${ADMIN_API_KEY:-change-me-in-production}

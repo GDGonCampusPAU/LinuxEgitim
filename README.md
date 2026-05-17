@@ -1,11 +1,11 @@
 # Linux Treasure Hunt: The Curl Master
 
-GDG on Campus PAU için Linux/terminal eğitim oyunu backend'i. Katılımcılar yalnızca `curl` komutu kullanarak 8 adımlı bir hazine avını çözer.
+GDG on Campus PAU için Linux/terminal eğitim oyunu backend'i. Katılımcılar yalnızca `curl` komutu kullanarak 5 adımlı bir hazine avını çözer.
 
 ## Mimari
 
 - **.NET 10** ASP.NET Core Minimal API
-- **Kestrel** çift listener: HTTP (oyun akışı) + HTTPS (sahte sertifika ile 7. adım)
+- **Kestrel** çift listener: HTTP + HTTPS (self-signed cert)
 - **JSON dosya** tabanlı skorbord (Docker volume ile kalıcı)
 - **SharpZipLib** ile parola korumalı arşiv üretimi
 - **Docker** ile tek komutta deploy
@@ -14,21 +14,20 @@ GDG on Campus PAU için Linux/terminal eğitim oyunu backend'i. Katılımcılar 
 
 | Adım | Endpoint | Davranış |
 |------|----------|----------|
-| 1 | `GET /start` | `/step/01-welcome` adresine 302 yönlendirme |
-| 2 | `GET /step/01-welcome` | Hoş geldin metni |
-| 3 | `GET /step/02-headers` | `X-Next-Step` header'ı ile bir sonraki adım |
-| 4 | `GET /step/03-download` | `ipucu.txt` indirme |
-| 5 | `GET /step/05-archive/mission.zip` | Parola korumalı zip |
-| 6 | `GET /step/07-secure` | Geçersiz sertifikalı HTTPS endpoint'i |
-| 7 | `POST /finish` | Form-data: `name`, `code` — skorboarda yazar (rate-limited) |
+| 1 | `GET /uyanis` | Başlangıç metni |
+| 2 | `GET /kapi` (veya HEAD) | `X-Yol` header'ı ile bir sonraki adımı bildirir |
+| 3 | `GET /arsiv` | `arsiv.txt` indirme — kasanın yolu ve şifre ipucu |
+| 4 | `GET /kasa/kalinti.zip` | Parola korumalı zip (içinde `sistem.txt`, `veriler.txt`, `beni_oku.txt`) |
+| 5 | `POST /sunak` | Form-data: `name`, `code` — skorboarda yazar (rate-limited) |
 
 ### Public ek endpoint'ler
 
 | Endpoint | Açıklama |
 |----------|----------|
-| `GET /game/info` | Frontend için özet: status, toplam katılımcı, top 3 |
-| `GET /scoreboard` | Tüm kazananların JSON listesi |
-| `GET /healthz` | Sağlık kontrolü |
+| `GET /` | Lobi metni — `/uyanis`'a yönlendirir |
+| `GET /oyun/durum` | Frontend için özet: durum, toplam yolcu, ilk 3 |
+| `GET /skor` | Tüm kazananların JSON listesi |
+| `GET /saglik` | Sağlık kontrolü |
 
 ### Admin endpoint'leri
 
@@ -51,24 +50,22 @@ dotnet run
 
 İlk çalıştırmada şu dosyalar otomatik üretilir (varsa atlanır):
 - `certs/dev-cert.pfx` — self-signed sertifika
-- `wwwroot/ipucu.txt` — 3. adımda servis edilecek ipucu metni
-- `wwwroot/list.txt` — 1000 satır, içine ACCESS_CODE gömülü
-- `wwwroot/mission.zip` — parola korumalı arşiv (list.txt içerir)
+- `wwwroot/arsiv.txt` — 3. adımda servis edilecek ipucu metni
+- `wwwroot/kalinti.zip` — parola korumalı arşiv; `sistem.txt` içinde ACCESS_CODE gömülü, `veriler.txt` ve `beni_oku.txt` decoy
 
 Servis dinler: `http://localhost:8080` ve `https://localhost:8443`.
 
 ### Hızlı test
 
 ```bash
-curl -L http://localhost:8080/start
-curl -I http://localhost:8080/step/02-headers
-curl -o ipucu.txt http://localhost:8080/step/03-download
-curl -O http://localhost:8080/step/05-archive/mission.zip
-unzip -P everything_is_a_file mission.zip
-grep ACCESS list.txt
-curl -k https://localhost:8443/step/07-secure
-curl -X POST -d "name=Furkan&code=linux_kernel_2026" http://localhost:8080/finish
-curl http://localhost:8080/scoreboard
+curl http://localhost:8080/uyanis
+curl -I http://localhost:8080/kapi
+curl -O http://localhost:8080/arsiv
+curl -O http://localhost:8080/kasa/kalinti.zip
+unzip -P gdgvesiberay kalinti.zip
+grep "kod=" sistem.txt
+curl -X POST -d "name=Furkan&code=linuxegitim101" http://localhost:8080/sunak
+curl http://localhost:8080/skor
 ```
 
 ## Deploy (Docker)
@@ -85,8 +82,8 @@ Servis varsayılan olarak host'un 80 ve 443 portlarına bağlanır. Ortam deği�
 |----------|------------|----------|
 | `HTTP_PORT` | `80` | Host HTTP portu |
 | `HTTPS_PORT` | `443` | Host HTTPS portu (geçersiz cert ile) |
-| `ACCESS_CODE` | `linux_kernel_2026` | POST /finish doğrulama kodu |
-| `ARCHIVE_PASSWORD` | `everything_is_a_file` | mission.zip parolası |
+| `ACCESS_CODE` | `linuxegitim101` | POST /sunak doğrulama kodu |
+| `ARCHIVE_PASSWORD` | `gdgvesiberay` | kalinti.zip parolası |
 | `CERT_PASSWORD` | `curlmaster` | PFX dosya parolası |
 | `ADMIN_API_KEY` | `change-me-in-production` | `/admin/*` endpoint'leri için Bearer token. **Production'da boş veya default değer ise servis startup'ta fail eder.** |
 | `CORS_ALLOWED_ORIGINS` | (boş = hepsi) | Frontend origin'i, ör: `https://app.example.com`. Public oyun için boş bırakılabilir; ayrı bir frontend domain'i varsa set et. |
@@ -102,7 +99,7 @@ Persist edilen volume'lar:
 ### Sağlık kontrolü
 
 ```bash
-curl http://<host>/healthz
+curl http://<host>/saglik
 docker compose ps          # healthcheck durumunu gösterir
 ```
 
@@ -114,7 +111,7 @@ docker compose logs -f curlmaster
 
 ## DNS / Domain Notu
 
-PDF'lerdeki `api.col` örnek bir domain. Gerçek deploy için kendi domain'ini bir A kaydıyla sunucu IP'sine yönlendir. Step 7'deki **geçersiz SSL sertifikası bilinçlidir** — oyunun bir parçası — gerçek bir cert (Let's Encrypt vb.) ALMA.
+PDF'lerdeki `api.col` örnek bir domain. Gerçek deploy için kendi domain'ini bir A kaydıyla sunucu IP'sine yönlendir. HTTPS listener self-signed cert kullanır — gerçek bir cert almaya gerek yok; oyun HTTP üzerinden çalışır.
 
 ## Yapılandırma
 
