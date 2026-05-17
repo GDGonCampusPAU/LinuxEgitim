@@ -1,4 +1,0 @@
-debug=false
-temp=123
-cache=enabled
-nothing=here
