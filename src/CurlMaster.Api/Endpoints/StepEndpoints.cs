@@ -78,7 +78,7 @@ public static class StepEndpoints
         {
             var expected = config["Game:AccessCode"];
 
-            if (!string.Equals(payload.Code, expected, StringComparison.Ordinal))
+            if (!string.Equals(payload.Code?.Trim(), expected, StringComparison.OrdinalIgnoreCase))
             {
                 return Results.BadRequest(
                     """
@@ -98,7 +98,18 @@ public static class StepEndpoints
                 );
             }
 
-            var entry = await scoreboard.RegisterAsync(payload.Name.Trim());
+            var (entry, isNew) = await scoreboard.RegisterAsync(payload.Name.Trim());
+
+            if (!isNew)
+            {
+                return Results.Conflict(
+                    $"""
+                    Bu isim zaten sıralamada (#{entry.Rank}).
+
+                    Farklı bir isim dene.
+                    """
+                );
+            }
 
             return Results.Text(
                 $"""

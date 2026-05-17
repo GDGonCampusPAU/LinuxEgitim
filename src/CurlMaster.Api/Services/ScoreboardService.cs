@@ -19,7 +19,7 @@ public sealed class ScoreboardService : IScoreboardService
             Directory.CreateDirectory(dir);
     }
 
-    public async Task<ScoreEntry> RegisterAsync(string name, CancellationToken ct = default)
+    public async Task<(ScoreEntry entry, bool isNew)> RegisterAsync(string name, CancellationToken ct = default)
     {
         await _lock.WaitAsync(ct);
         try
@@ -30,8 +30,8 @@ public sealed class ScoreboardService : IScoreboardService
                 string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
             if (existing is not null)
             {
-                _logger.LogInformation("Duplicate finish for {Name}, returning existing rank {Rank}", name, existing.Rank);
-                return existing;
+                _logger.LogInformation("Duplicate finish attempt for {Name} (existing rank {Rank})", name, existing.Rank);
+                return (existing, false);
             }
 
             var entry = new ScoreEntry(
@@ -42,7 +42,7 @@ public sealed class ScoreboardService : IScoreboardService
             entries.Add(entry);
             await SaveAsync(entries, ct);
             _logger.LogInformation("Registered finisher {Name} at rank {Rank}", name, entry.Rank);
-            return entry;
+            return (entry, true);
         }
         finally
         {
