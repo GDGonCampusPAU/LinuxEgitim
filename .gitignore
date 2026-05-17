@@ -69,6 +69,8 @@ scoreboard.json
 # ============================================
 # Generated content (regenerate via scripts)
 # ============================================
+src/CurlMaster.Api/wwwroot/arsiv.txt
+src/CurlMaster.Api/wwwroot/kalinti.zip
 src/CurlMaster.Api/wwwroot/mission.zip
 src/CurlMaster.Api/wwwroot/mission.rar
 src/CurlMaster.Api/wwwroot/list.txt
