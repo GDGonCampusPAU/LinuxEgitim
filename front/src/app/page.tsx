@@ -42,7 +42,7 @@ export default function Home() {
               </div>
               <div className="mt-8 rounded-xl border border-white/10 bg-[#0b151d]/90 p-4 font-mono text-sm text-[#b6ffdf]">
                 <Terminal className="mr-2 inline h-4 w-4" />
-                curl -L {process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}/start
+                curl -L {process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}/uyanis
               </div>
             </div>
 

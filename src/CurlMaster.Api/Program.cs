@@ -19,11 +19,27 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(httpsPort, listen => listen.UseHttps(certPath, certPassword));
 });
 
+var knownProxies = builder.Configuration.GetSection("ForwardedHeaders:KnownProxies").Get<string[]>() ?? [];
+var knownNetworks = builder.Configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? [];
+
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
+    options.ForwardLimit = null;
+
+    foreach (var proxy in knownProxies)
+    {
+        if (System.Net.IPAddress.TryParse(proxy, out var ip))
+            options.KnownProxies.Add(ip);
+    }
+
+    foreach (var network in knownNetworks)
+    {
+        if (System.Net.IPNetwork.TryParse(network, out var parsed))
+            options.KnownIPNetworks.Add(parsed);
+    }
 });
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -67,6 +83,14 @@ builder.Services.AddScoped<AdminAuthFilter>();
 builder.Services.AddHostedService<ContentInitializer>();
 
 var app = builder.Build();
+
+var adminKey = app.Configuration["Admin:ApiKey"];
+if (app.Environment.IsProduction() &&
+    (string.IsNullOrWhiteSpace(adminKey) || adminKey == "change-me-in-production"))
+{
+    throw new InvalidOperationException(
+        "Admin:ApiKey must be set via ADMIN_API_KEY environment variable in production.");
+}
 
 app.UseForwardedHeaders();
 app.UseCors();

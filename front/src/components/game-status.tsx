@@ -35,14 +35,14 @@ export function GameStatus() {
           <Activity className="h-4 w-4 text-[#23d18b]" />
           Durum
         </div>
-        <div className="text-2xl font-black text-white">{info?.status === "active" ? "Aktif" : "Bekleniyor"}</div>
+        <div className="text-2xl font-black text-white">{info?.durum === "aktif" ? "Aktif" : "Bekleniyor"}</div>
       </div>
       <div className="rounded-xl border border-white/10 bg-white/6 p-4">
         <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-white/50">
           <Users className="h-4 w-4 text-[#00b3ff]" />
           Finalist
         </div>
-        <div className="text-2xl font-black text-white">{info?.totalParticipants ?? 0}</div>
+        <div className="text-2xl font-black text-white">{info?.toplamYolcu ?? 0}</div>
       </div>
     </div>
   );

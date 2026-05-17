@@ -34,21 +34,24 @@ public sealed class ContentService : IContentService
 
             var utf8NoBom = new UTF8Encoding(false);
 
-            var ipucuPath = Path.Combine(wwwroot, "ipucu.txt");
-            if (force || !File.Exists(ipucuPath))
+            var arsivPath = Path.Combine(wwwroot, "arsiv.txt");
+            if (force || !File.Exists(arsivPath))
             {
-                await File.WriteAllTextAsync(ipucuPath, BuildIpucuText(), utf8NoBom, ct);
-                _logger.LogInformation("Wrote {File}", ipucuPath);
+                await File.WriteAllTextAsync(arsivPath, BuildArsiv(), utf8NoBom, ct);
+                _logger.LogInformation("Wrote {File}", arsivPath);
             }
 
-            var listPath = Path.Combine(wwwroot, "list.txt");
-            var zipPath = Path.Combine(wwwroot, "mission.zip");
-
+            var zipPath = Path.Combine(wwwroot, "kalinti.zip");
             if (force || !File.Exists(zipPath))
             {
-                var listBytes = utf8NoBom.GetBytes(BuildListText(accessCode));
-                await File.WriteAllBytesAsync(listPath, listBytes, ct);
-                PackPasswordZip(zipPath, archivePassword, "list.txt", listBytes);
+                var entries = new (string name, byte[] data)[]
+                {
+                    ("sistem.txt", utf8NoBom.GetBytes(BuildSistem(accessCode))),
+                    ("veriler.txt", utf8NoBom.GetBytes(BuildVeriler())),
+                    ("beni_oku.txt", utf8NoBom.GetBytes(BuildBeniOku())),
+                };
+
+                PackPasswordZip(zipPath, archivePassword, entries);
                 _logger.LogInformation("Wrote {File} ({Size} bytes)", zipPath, new FileInfo(zipPath).Length);
             }
         }
@@ -58,85 +61,63 @@ public sealed class ContentService : IContentService
         }
     }
 
-    private static string BuildIpucuText() =>
+    private static string BuildArsiv() =>
         """
-        Tebrikler! İlk engeli aştın.
+        Kayıp kalıntı arşivde saklanıyor.
 
-        Bir sonraki ipucu kilitli bir arşivin içinde.
-        Arşivi indir:
-          curl -O http://api.col/step/05-archive/mission.zip
+        Yol:
+        /kasa/kalinti.zip
 
-        Parola İpucu:
-          Linux'ta temel bir felsefe vardır: "Linux'ta her şey bir dosyadır."
-          Bu cümlenin İNGİLİZCESİNİ küçük harflerle yaz, boşluk yerine alt çizgi (_) koy.
-
-        Arşivi açtıktan sonra list.txt içinde ACCESS kelimesini grep ile ara.
+        Kasayı GDG ve Siberay açar.
         """;
 
-    private static string BuildListText(string accessCode)
-    {
-        var rng = new Random(42);
-        var lines = new List<string>(1000);
-        var accessLineIndex = rng.Next(250, 850);
+    private static string BuildSistem(string accessCode) =>
+        $"""
+        [INFO] sistem başlatıldı
+        [DEBUG] bağlantı kuruldu
+        [WARN] eski anahtar bulundu
+        [INFO] hedef=/sunak
+        [ERROR] kod=YANLIS-1453
+        [INFO] kod={accessCode}
+        [TRACE] işlem tamamlandı
 
-        for (var i = 0; i < 1000; i++)
-        {
-            lines.Add(i == accessLineIndex
-                ? $"ACCESS_CODE: {accessCode}"
-                : GenerateNoiseLine(rng, i));
-        }
+        "name=ADINIZ_SOYADINIZ&code=GİZLİ_KOD" isteğin içerisi bu sekilde olmasi gerekiyor
+        """;
 
-        return string.Join('\n', lines);
-    }
+    private static string BuildVeriler() =>
+        """
+        debug=false
+        temp=123
+        cache=enabled
+        nothing=here
+        """;
 
-    private static string GenerateNoiseLine(Random rng, int index)
-    {
-        var templates = new[]
-        {
-            "[INFO] kernel: TCP connection established from 10.{0}.{1}.{2}",
-            "[DEBUG] systemd[1]: Starting {3}.service",
-            "ext4-fs (sda{4}): mounted filesystem with ordered data mode",
-            "wpa_supplicant: CTRL-EVENT-CONNECTED to {5}",
-            "audit: type=1400 audit({6}): apparmor=\"ALLOWED\"",
-            "loaded module: {7} (verified)",
-            "[WARN] dhclient: lease offered: 192.168.{0}.{1}",
-            "snd_hda_intel: codec stream {4} initialized",
-            "usb {4}-{8}: new high-speed USB device number {8} using xhci_hcd",
-            "Bluetooth: hci{4}: link key request received",
-        };
+    private static string BuildBeniOku() =>
+        """
+        Gerçek cevap genellikle gürültünün içinde saklanır.
 
-        var services = new[] { "nginx", "redis", "docker", "containerd", "sshd", "cron", "cups", "rsyslog" };
-        var modules = new[] { "brcmfmac", "nvidia_drm", "i915", "btusb", "snd_usb_audio", "uvcvideo", "kvm_intel" };
-        var ssids = new[] { "GDGonCampusPAU_5G", "EduRoam", "Office-WiFi", "Guest-Network", "ctf-arena" };
+        Kayıtları dikkatlice incele.
+        """;
 
-        var template = templates[rng.Next(templates.Length)];
-        return string.Format(template,
-            rng.Next(0, 255),
-            rng.Next(0, 255),
-            rng.Next(0, 255),
-            services[rng.Next(services.Length)],
-            rng.Next(0, 9),
-            ssids[rng.Next(ssids.Length)],
-            (1700000000 + index * 1000).ToString(),
-            modules[rng.Next(modules.Length)],
-            rng.Next(1, 32));
-    }
-
-    private static void PackPasswordZip(string zipPath, string password, string entryName, byte[] entryContent)
+    private static void PackPasswordZip(string zipPath, string password, IReadOnlyList<(string name, byte[] data)> entries)
     {
         using var output = File.Create(zipPath);
         using var zip = new ZipOutputStream(output);
         zip.Password = password;
         zip.SetLevel(6);
 
-        var entry = new ZipEntry(entryName)
+        foreach (var (name, data) in entries)
         {
-            DateTime = DateTime.UtcNow,
-            Size = entryContent.Length,
-        };
-        zip.PutNextEntry(entry);
-        zip.Write(entryContent, 0, entryContent.Length);
-        zip.CloseEntry();
+            var entry = new ZipEntry(name)
+            {
+                DateTime = DateTime.UtcNow,
+                Size = data.Length,
+            };
+            zip.PutNextEntry(entry);
+            zip.Write(data, 0, data.Length);
+            zip.CloseEntry();
+        }
+
         zip.Finish();
     }
 }

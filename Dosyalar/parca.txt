@@ -1,0 +1,6 @@
+Kayıp kalıntı arşivde saklanıyor.
+
+Yol:
+/kasa/kalinti.zip
+
+Kasa başlangıçtaki adı hatırlıyor. (ilk olusturulan dosyayi hatirla)

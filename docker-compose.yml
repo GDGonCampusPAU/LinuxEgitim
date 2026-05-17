@@ -12,10 +12,12 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Game__AccessCode: ${ACCESS_CODE:-linux_kernel_2026}
-      Game__ArchivePassword: ${ARCHIVE_PASSWORD:-everything_is_a_file}
+      Game__ArchivePassword: ${ARCHIVE_PASSWORD:-gdgvesiberay}
       Game__HttpsCertPassword: ${CERT_PASSWORD:-curlmaster}
       Admin__ApiKey: ${ADMIN_API_KEY:-change-me-in-production}
       Cors__AllowedOrigins__0: ${CORS_ALLOWED_ORIGINS:-}
+      ForwardedHeaders__KnownProxies__0: ${KNOWN_PROXY:-}
+      ForwardedHeaders__KnownNetworks__0: ${KNOWN_NETWORK:-}
     volumes:
       - ./data:/app/data
       - ./certs:/app/certs

@@ -25,6 +25,15 @@ public sealed class ScoreboardService : IScoreboardService
         try
         {
             var entries = await LoadAsync(ct);
+
+            var existing = entries.FirstOrDefault(e =>
+                string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (existing is not null)
+            {
+                _logger.LogInformation("Duplicate finish for {Name}, returning existing rank {Rank}", name, existing.Rank);
+                return existing;
+            }
+
             var entry = new ScoreEntry(
                 Name: name,
                 TimestampMs: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),

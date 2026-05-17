@@ -88,8 +88,10 @@ Servis varsayılan olarak host'un 80 ve 443 portlarına bağlanır. Ortam deği�
 | `ACCESS_CODE` | `linux_kernel_2026` | POST /finish doğrulama kodu |
 | `ARCHIVE_PASSWORD` | `everything_is_a_file` | mission.zip parolası |
 | `CERT_PASSWORD` | `curlmaster` | PFX dosya parolası |
-| `ADMIN_API_KEY` | `change-me-in-production` | `/admin/*` endpoint'leri için Bearer token |
-| `CORS_ALLOWED_ORIGINS` | (boş = hepsi) | Frontend origin'i, ör: `https://app.example.com` |
+| `ADMIN_API_KEY` | `change-me-in-production` | `/admin/*` endpoint'leri için Bearer token. **Production'da boş veya default değer ise servis startup'ta fail eder.** |
+| `CORS_ALLOWED_ORIGINS` | (boş = hepsi) | Frontend origin'i, ör: `https://app.example.com`. Public oyun için boş bırakılabilir; ayrı bir frontend domain'i varsa set et. |
+| `KNOWN_PROXY` | (boş) | Reverse proxy (nginx, Cloudflare tek IP) arkasındaysa proxy IP'si. Rate-limit'in gerçek istemci IP'sine göre çalışması için gerekli. |
+| `KNOWN_NETWORK` | (boş) | Reverse proxy CIDR aralığı, ör: `173.245.48.0/20`. Cloudflare gibi çoklu IP havuzu kullanan sağlayıcılar için. |
 
 Persist edilen volume'lar:
 - `./data` — `scoreboard.json` (kazananlar listesi)

@@ -34,13 +34,12 @@ async function text(path: string, init?: RequestInit): Promise<string> {
 
 export const api = {
   baseUrl: API_URL,
-  getGameInfo: () => request<GameInfo>("/game/info"),
-  getScoreboard: () => request<ScoreEntry[]>("/scoreboard"),
-  getWelcome: () => text("/step/01-welcome"),
-  getIpucu: () => text("/step/03-download"),
-  getList: () => text("/list.txt"),
-  getNextStepFromHeaders: async () => {
-    const response = await fetch(`${API_URL}/step/02-headers`, {
+  getGameInfo: () => request<GameInfo>("/oyun/durum"),
+  getScoreboard: () => request<ScoreEntry[]>("/skor"),
+  getUyanis: () => text("/uyanis"),
+  getParca: () => text("/arsiv"),
+  getKapiYol: async () => {
+    const response = await fetch(`${API_URL}/kapi`, {
       method: "HEAD",
       cache: "no-store",
     });
@@ -50,10 +49,11 @@ export const api = {
       throw new ApiError(response.status, body || response.statusText);
     }
 
-    return response.headers.get("X-Next-Step") ?? "";
+    return response.headers.get("X-Yol") ?? "";
   },
+  kalintiZipUrl: `${API_URL}/kasa/kalinti.zip`,
   finish: (name: string, code: string) =>
-    request<string>("/finish", {
+    request<string>("/sunak", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ name, code }),

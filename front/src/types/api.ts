@@ -5,9 +5,9 @@ export interface ScoreEntry {
 }
 
 export interface GameInfo {
-  status: string;
-  totalParticipants: number;
-  topThree: ScoreEntry[];
+  durum: string;
+  toplamYolcu: number;
+  ilkUc: ScoreEntry[];
 }
 
 export interface AdminState {

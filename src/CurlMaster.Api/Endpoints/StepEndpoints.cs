@@ -39,7 +39,7 @@ public static class StepEndpoints
 
         app.MapGet("/arsiv", (IWebHostEnvironment env) =>
         {
-            var path = Path.Combine(env.WebRootPath, "parca.txt");
+            var path = Path.Combine(env.WebRootPath, "arsiv.txt");
 
             if (!File.Exists(path))
             {
@@ -52,7 +52,7 @@ public static class StepEndpoints
                 );
             }
 
-            return Results.File(path, "text/plain", "parca.txt");
+            return Results.File(path, "text/plain", "arsiv.txt");
         });
 
         app.MapGet("/kasa/kalinti.zip", (IWebHostEnvironment env) =>

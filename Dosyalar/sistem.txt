@@ -1,0 +1,9 @@
+[INFO] sistem başlatıldı
+[DEBUG] bağlantı kuruldu
+[WARN] eski anahtar bulundu
+[INFO] hedef=/sunak
+[ERROR] kod=YANLIS-1453
+[INFO] kod=linuxegitim101
+[TRACE] işlem tamamlandı
+
+"name=ADINIZ_SOYADINIZ&code=GİZLİ_KOD" isteğin içerisi bu sekilde olmasi gerekiyor
